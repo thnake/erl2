@@ -19,9 +19,8 @@ print (P,Q)->io:write(P),io:fwrite("~n"),io:write(Q),io:fwrite("~n"),true.
 %%%
 %%%%%%%%%%%%%%%%
 -spec extractLetters(list(non_neg_integer()))->list(list(char())).
-
 extractLetters([])->[[]];
-extractLetters([H|T]) -> [ Y++[Q] || Y <- extractLetters(T), Q <- assignChar(H)	 ].
+extractLetters([H|T]) -> [ Y++[Q] || Y <- extractLetters(T), Q <- assignChar(H)	].
 
 
 %%%%%%%%%%%%%%%%
@@ -35,9 +34,14 @@ extractLetters([H|T]) -> [ Y++[Q] || Y <- extractLetters(T), Q <- assignChar(H)	
 %%%%%%%%%%%%%%%%
 
 -spec splitter(char(),list({char(),non_neg_integer()}))->list({char(), non_neg_integer()}).
-splitter(X,Y) -> toBeDefined.
+splitter(X,[])->[{X, 1}];
+splitter(X,[{Y, Count}|T])-> case X == Y of
+                            true -> [{X,Count+1}|T];
+                            false -> [{X,1},{Y,Count}|T] end.
+
 
 -spec letterOccurences(list(char()))->occurrenceList().  
+
 letterOccurences(Word)-> SList= lists:sort(Word),
 					OccList= lists:foldl(fun splitter/2,"",SList),
 					lists:reverse(OccList).
@@ -56,7 +60,11 @@ letterOccurences(Word)-> SList= lists:sort(Word),
 %%%%%%%%%%%%%%%%					
 
 -spec groupBy(fun((A) -> B), list(A)) -> dict:dict(B,A).
-groupBy(GBFun, List)-> toBeDefined.
+groupBy(F, [])-> dict:new();
+groupBy(F, [H|T])-> dict:append(F(H), H, groupBy(F,T)).
+
+
+
 
 %%%%%%%%%%%%%%%%
 %%%
