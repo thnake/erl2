@@ -79,7 +79,12 @@ groupBy(F, [H|T])-> dict:append(F(H), H, groupBy(F,T)).
 %%%%%%%%%%%%%%%%
 		
 -spec dictionaryOccurences()->  dict() | {error,atom()}.
-dictionaryOccurences() -> toBeDefined.
+dictionaryOccurences() -> {_,{Dict,_}} = loadDictionary(),
+                          Grouped = groupBy(fun letterOccurences/1, Dict),
+                          Grouped.
+
+toLower([],lowd)->lowd;
+toLower([H|T],lowd)-> toLower(T, lowd++string:to_lower(H)). 
 
 %%%%%%%%%%%%%%%%
 %%%
