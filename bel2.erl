@@ -108,8 +108,8 @@ combinations([]) -> [ [] ];
 
 combinations([{Letter,Occ}|XS]) -> [ removeZero(Y,{Letter,Q}) || Y<-combinations(XS), Q<-lists:seq(0,Occ)].
 
-removeZero(Y, T)-> io:write(T),io:fwrite("~n"), {C, Occ} = T,
-                case Occ == 0 of
+removeZero(Y, T)-> {C, Occ} = T,
+                case Occ =< 0 of
                 true -> Y;   
                 false -> Y++[T]
 end.
@@ -122,7 +122,15 @@ end.
 %%% das Ergebnis [{$a,3},{$b,5},{$d,8}].
 
 -spec subtract(occurrenceList(), occurrenceList())-> occurrenceList().
-subtract(Occ1, Occ2)-> toBeDefined.
+subtract(Occ1, Occ2)-> L = [
+case lists:keyfind(K2,1,Occ1) of
+        {K1,O1} ->  removeZero([],{K1, O2-O1});
+        false -> {K2, O2} end 
+        ||   {K2, O2} <- Occ2],
+        lists:sort(lists:flatten(L)).
+
+
+
 
 %%%%%%%%%%%%%%%%
 %%%	
