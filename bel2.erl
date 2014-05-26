@@ -83,8 +83,8 @@ dictionaryOccurences() -> {_,{Dict,_}} = loadDictionary(),
                           Grouped = groupBy(fun letterOccurences/1, Dict),
                           Grouped.
 
-toLower([],lowd)->lowd;
-toLower([H|T],lowd)-> toLower(T, lowd++string:to_lower(H)). 
+toLower([],Lowd)->Lowd;
+toLower([H|T],Lowd)-> toLower(T, [Lowd | string:to_lower(H)]). 
 
 %%%%%%%%%%%%%%%%
 %%%
@@ -94,18 +94,26 @@ toLower([H|T],lowd)-> toLower(T, lowd++string:to_lower(H)).
 %%% [{97,1}],
 %%% [{97,1},{98,1}],
 %%% [{97,1},{98,2}],
-%%% [{97,2}],[{97,2},
-%%% {98,1}],[{97,2},
-%%% {98,2}],[{98,1}],
+%%% [{97,2}],
+%%% [{97,2},{98,1}],
+%%% [{97,2},{98,2}],
+%%% [{98,1}],
 %%% [{98,2}]]
 %%% Achtung: Die Anzahl der Buchstabenvorkommen (zweiter Wert des Tupels) muessen immer groesser 0 sein. 
 
 -spec combinations(occurrenceList())->list(occurrenceList()).
 combinations([]) -> [ [] ];
+%combinations([{Letter,Occ}|XS]) -> [ Y++[{Letter,Q}] || Y<-combinations(XS), Q<-lists:seq(0,Occ)].
+
+
 combinations([{Letter,Occ}|XS]) -> [ removeZero(Y,{Letter,Q}) || Y<-combinations(XS), Q<-lists:seq(0,Occ)].
 
+removeZero(Y, T)-> io:write(T),io:fwrite("~n"), {C, Occ} = T,
+                case Occ == 0 of
+                true -> Y;   
+                false -> Y++[T]
+end.
 
-removeZero(Y,T)->toBeDefined.
 
 %%%%%%%%%%%%%%%%
 %%%
