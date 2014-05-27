@@ -167,9 +167,25 @@ getWordLists(OccList, Dict) -> C = combinations(OccList),
                                Keys = [E || E <- C, dict:is_key(lists:reverse(E),Dict)], Keys.
 
 
+getValidCombination
+extractLetters([])->[[]];
+extractLetters([H|T]) -> [ Y++[Q] || Y <- extractLetters(T), Q <- assignChar(H)	].
 
 
 
+F([], Combinations, Acc)-> {success, Acc};
+F(Metalist, [Hcom|Tcom], Acc) -> Delta = subtract(Hcom, Metalist),
+                                
+
+
+F(Metalist, [Hcom|Tcom], Acc)-> Delta = subtract(Hcom,Metalist),
+                                case length(Delta) < length(Metalist)
+                                true -> {Des, Val} = F(Delta, Tcom, Acc++[Hcom]),
+                                            case Des of 
+                                            success -> Val end;
+                                False -> {Des, Val} = F(Metalist, Tcom, Acc) end,
+                            
+                                
 
 %%%%%%%%%%%%%%%%%%%%%%%%
 %%%
