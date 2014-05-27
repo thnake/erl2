@@ -42,7 +42,7 @@ splitter(X,[{Y, Count}|T])-> case X == Y of
 
 -spec letterOccurences(list(char()))->occurrenceList().  
 
-letterOccurences(Word)-> SList= lists:sort(Word),
+letterOccurences(Word)-> SList= lists:sort(string:to_lower(Word)),
 					OccList= lists:foldl(fun splitter/2,"",SList),
 					lists:reverse(OccList).
 
@@ -83,8 +83,7 @@ dictionaryOccurences() -> {_,{Dict,_}} = loadDictionary(),
                           Grouped = groupBy(fun letterOccurences/1, Dict),
                           Grouped.
 
-toLower([],Lowd)->Lowd;
-toLower([H|T],Lowd)-> toLower(T, [Lowd | string:to_lower(H)]). 
+
 
 %%%%%%%%%%%%%%%%
 %%%
@@ -102,16 +101,19 @@ toLower([H|T],Lowd)-> toLower(T, [Lowd | string:to_lower(H)]).
 %%% Achtung: Die Anzahl der Buchstabenvorkommen (zweiter Wert des Tupels) muessen immer groesser 0 sein. 
 
 -spec combinations(occurrenceList())->list(occurrenceList()).
-combinations([]) -> [ [] ];
-%combinations([{Letter,Occ}|XS]) -> [ Y++[{Letter,Q}] || Y<-combinations(XS), Q<-lists:seq(0,Occ)].
+combinations(L)-> comb(L).
+
+comb([]) -> [ [] ];
+comb([{Letter,Occ}|XS]) -> [ removeZero(Y,{Letter,Q}) || Y<-comb(XS), Q<-lists:seq(0,Occ)].
 
 
-combinations([{Letter,Occ}|XS]) -> [ removeZero(Y,{Letter,Q}) || Y<-combinations(XS), Q<-lists:seq(0,Occ)].
+filterEmptyList([])->false;
+filterEmptyList(_)->true.
 
 removeZero(Y, T)-> {C, Occ} = T,
                 case Occ =< 0 of
                 true -> Y;   
-                false -> Y++[T]
+                false -> Y++[T] 
 end.
 
 
@@ -161,7 +163,13 @@ case lists:keyfind(K2,1,Occ1) of
 %%% ["Lin","Rex","Zulu"]]
 
 -spec getWordLists(occurrenceList(), dict())->list(list(list(char()))).
-getWordLists(OccList, Dict) -> toBeDefined.	
+getWordLists(OccList, Dict) -> C = combinations(OccList),
+                               Keys = [E || E <- C, dict:is_key(lists:reverse(E),Dict)], Keys.
+
+
+
+
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%
 %%%
@@ -194,6 +202,8 @@ getSentences(NumberList)->
 %%% ergeben nicht unbedingt augenscheinlichen Sinn. 
 -spec frname()->list(char()).		
 frname()-> "words_eng.txt".
+%frname()-> "stub.txt".
+
 
 -spec loadDictionary()->{ok, {list(list(char)),integer()}} | {error, atom()}.
 loadDictionary() ->    
