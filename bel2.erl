@@ -3,7 +3,7 @@
 
 
 print (P,Q)->io:write(P),io:fwrite("~n"),io:write(Q),io:fwrite("~n"),true.
-
+print(P)->io:write(P),io:fwrite("~n").
 
 %%% Type occurenceList repraesentiert eine Menge von Buchstaben, die in einem Wort vorkommen.
 %%% Die Buchstabenvorkommen werden als Tupel repraesentiert, bei denen der erste Wert des Characters ist
@@ -112,7 +112,7 @@ filterEmptyList(_)->true.
 
 removeZero(Y, T)-> {C, Occ} = T,
                 case Occ =< 0 of
-                true -> Y;   
+                true -> Y;
                 false -> Y++[T] 
 end.
 
@@ -134,7 +134,7 @@ case lists:keyfind(K2,1,Occ1) of
 
 
 
-%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%% bel2:getWordLists([{$i,1},{$l,2},{$n,1}],bel2:dictionaryOccurences()). 
 %%%	
 %%% getWordLists soll aus einer beliebigen occurenceList und einem Dictionary, die Listen von Woertern bilden, die
 %%% durch die occurrenceList repraesentiert werden koennen.
@@ -157,33 +157,65 @@ case lists:keyfind(K2,1,Occ1) of
 %%% ["Rex","null","Uzi"],
 %%% ["null","Rex","Uzi"],
 %%% ["Linux","rulez"],
-%%% ["Rex","nil","Zulu"],
+%%% ["Rex","nil","Zulu"],   
 %%% ["Rex","Lin","Zulu"],
 %%% ["nil","Rex","Zulu"],
 %%% ["Lin","Rex","Zulu"]]
 
+
+reclist(0) -> [ [] ];
+reclist(X) -> [ Y++[Q] || Y<-reclist(X-1), Q<-lists:seq(1,3)].
+
+
 -spec getWordLists(occurrenceList(), dict())->list(list(list(char()))).
 getWordLists(OccList, Dict) -> C = combinations(OccList),
-                               Keys = [E || E <- C, dict:is_key(lists:reverse(E),Dict)], Keys.
+                               Keys = [E || E <- C, dict:is_key(lists:reverse(E),Dict)],%, Keys,
+                               %Wss = wordsSuperset(Keys, Dict,[]),
+                               b(OccList,Keys).
 
 
-getValidCombination
-extractLetters([])->[[]];
-extractLetters([H|T]) -> [ Y++[Q] || Y <- extractLetters(T), Q <- assignChar(H)	].
+wordsSuperset([], Dict, Acc) -> Acc;
+wordsSuperset([H|T], Dict, Acc)->  {ok, Item} = dict:find(lists:reverse(H),Dict), 
+                               wordsSuperset(T, Dict, lists:append(Acc,Item)).
+
+
+%Todo: gesamtmenge erzeugen und die Erzeugung filtern
+%btKeys([], OccList)->[[]];
+%btKeys(Keys,OccList)->[Y++[Q] || Y <- btKeys(subtract(Q,OccList)), Q <- Keys].
+
+
+b([], Keys)->[[]];
+b(_, [])-> [[]];
+b(OL, [H|T])->Delta = subtract(H,OL),
+              print(Delta),
+              [Y++[Q] || Y <- b(Delta, [H|T]), Q <-[H|T], len(Delta) < len(OL)].
+
+
+accept(OccList, Item)-> Delta = subtract(Item,OccList),
+                                case length(Delta) < length(OccList) of
+                                true -> true;
+                                false -> false
+                                end.
 
 
 
-F([], Combinations, Acc)-> {success, Acc};
-F(Metalist, [Hcom|Tcom], Acc) -> Delta = subtract(Hcom, Metalist),
-                                
 
 
-F(Metalist, [Hcom|Tcom], Acc)-> Delta = subtract(Hcom,Metalist),
-                                case length(Delta) < length(Metalist)
-                                true -> {Des, Val} = F(Delta, Tcom, Acc++[Hcom]),
-                                            case Des of 
-                                            success -> Val end;
-                                False -> {Des, Val} = F(Metalist, Tcom, Acc) end,
+len(OL)->lenWorker(OL,0).
+lenWorker([],Acc)->Acc;
+lenWorker([{_,X}|T], Acc)-> lenWorker(T,Acc+X).
+
+%F([], Combinations, Acc)-> {success, Acc};
+%F(Metalist, [Hcom|Tcom], Acc) -> Delta = subtract(Hcom, Metalist),
+%                                
+%
+%
+%F(Metalist, [Hcom|Tcom], Acc)-> Delta = subtract(Hcom,Metalist),
+%                                case length(Delta) < length(Metalist)
+%                                true -> {Des, Val} = F(Delta, Tcom, Acc++[Hcom]),
+%                                            case Des of 
+%                                            success -> Val end;
+%                                False -> {Des, Val} = F(Metalist, Tcom, Acc) end,
                             
                                 
 
@@ -217,8 +249,8 @@ getSentences(NumberList)->
 %%% Achtung: Das Woerterbuch ist ueber die Linux-Manpages generiert - manche Woerter
 %%% ergeben nicht unbedingt augenscheinlichen Sinn. 
 -spec frname()->list(char()).		
-frname()-> "words_eng.txt".
-%frname()-> "stub.txt".
+%frname()-> "words_eng.txt".
+frname()-> "stub.txt".
 
 
 -spec loadDictionary()->{ok, {list(list(char)),integer()}} | {error, atom()}.
