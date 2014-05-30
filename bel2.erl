@@ -2,8 +2,8 @@
 -compile(export_all).
 
 
-print (P,Q)->io:write(P),io:fwrite("~n"),io:write(Q),io:fwrite("~n"),true.
-print(P)->io:write(P),io:fwrite("~n").
+print (P,Q)->io:write(P),io:fwrite(" "),io:write(Q),io:fwrite("~n"),true.
+print(P)->io:write(P),io:fwrite("~n"),true.
 
 %%% Type occurenceList repraesentiert eine Menge von Buchstaben, die in einem Wort vorkommen.
 %%% Die Buchstabenvorkommen werden als Tupel repraesentiert, bei denen der erste Wert des Characters ist
@@ -92,7 +92,7 @@ dictionaryOccurences() -> {_,{Dict,_}} = loadDictionary(),
 %%% folgende Kombinationen bilden:
 %%% [{97,1}],
 %%% [{97,1},{98,1}],
-%%% [{97,1},{98,2}],
+%%% [{97,1},{98,2}],<<
 %%% [{97,2}],
 %%% [{97,2},{98,1}],
 %%% [{97,2},{98,2}],
@@ -110,11 +110,15 @@ comb([{Letter,Occ}|XS]) -> [ removeZero(Y,{Letter,Q}) || Y<-comb(XS), Q<-lists:s
 filterEmptyList([])->false;
 filterEmptyList(_)->true.
 
-removeZero(Y, T)-> {C, Occ} = T,
-                case Occ =< 0 of
-                true -> Y;
-                false -> Y++[T] 
-end.
+
+removeZero(Y, {Letter, Occurrence}) ->
+                                    if
+                                     Occurrence > 0 ->
+                                    lists:flatten([{Letter, Occurrence}, Y]);
+                                     true ->
+                                       Y
+                                    end.
+
 
 
 %%%%%%%%%%%%%%%%
@@ -130,6 +134,10 @@ case lists:keyfind(K2,1,Occ1) of
         false -> {K2, O2} end 
         ||   {K2, O2} <- Occ2],
         lists:sort(lists:flatten(L)).
+
+
+
+
 
 
 
@@ -162,42 +170,30 @@ case lists:keyfind(K2,1,Occ1) of
 %%% ["nil","Rex","Zulu"],
 %%% ["Lin","Rex","Zulu"]]
 
+t()->getWordLists([{$e,1},{$i,1},{$l,2},{$n,1},{$r,1},{$u,2},{$x,1},{$z,1}],dictionaryOccurences()).
+t(X)->getWordLists(X,dictionaryOccurences()).
 
-reclist(0) -> [ [] ];
-reclist(X) -> [ Y++[Q] || Y<-reclist(X-1), Q<-lists:seq(1,3)].
-
+l()->D =dictionaryOccurences(), [X || X <- dict:fetch([{$a,2},{$c,2}],D)]. 
 
 -spec getWordLists(occurrenceList(), dict())->list(list(list(char()))).
-getWordLists(OccList, Dict) -> C = combinations(OccList),
-                               Keys = [E || E <- C, dict:is_key(lists:reverse(E),Dict)],%, Keys,
-                               %Wss = wordsSuperset(Keys, Dict,[]),
-                               b(OccList,Keys).
+getWordLists([],_)->[[]];
+getWordLists(OccList, Dict) -> 
+[[Word|Y] || X <- combinations(OccList), dict:is_key(X, Dict), Y <- getWordLists(subtract(X,OccList),Dict), Word <- dict:fetch(X,Dict)].
 
 
-wordsSuperset([], Dict, Acc) -> Acc;
-wordsSuperset([H|T], Dict, Acc)->  {ok, Item} = dict:find(lists:reverse(H),Dict), 
-                               wordsSuperset(T, Dict, lists:append(Acc,Item)).
 
 
-%Todo: gesamtmenge erzeugen und die Erzeugung filtern
-%btKeys([], OccList)->[[]];
-%btKeys(Keys,OccList)->[Y++[Q] || Y <- btKeys(subtract(Q,OccList)), Q <- Keys].
+keyfind(X,Dict)->{_, W} = dict:find(X,Dict),print(w,W),true.
+
+g()->[[X|Y] || X <- g1(), Y <- g2() ,grd(X,Y)].
+g1()->print(g1),[1,2,3].
+g2()->print(g2),[7,8,9].
+grd(X,Y)->print(X,Y), print(grd),true.
 
 
-b([], Keys)->[[]];
-b(_, [])-> [[]];
-b(OL, [H|T])->Delta = subtract(H,OL),
-              print(Delta),
-              [Y++[Q] || Y <- b(Delta, [H|T]), Q <-[H|T], len(Delta) < len(OL)].
 
-
-accept(OccList, Item)-> Delta = subtract(Item,OccList),
-                                case length(Delta) < length(OccList) of
-                                true -> true;
-                                false -> false
-                                end.
-
-
+%wordsSuperset([], Dict, Acc) -> Acc;
+%wordsSuperset([H|T], Dict, Acc)->  {ok, Item} = dict:find(H,Dict), (T, Dict, lists:append(Acc,Item)).
 
 
 
@@ -205,19 +201,7 @@ len(OL)->lenWorker(OL,0).
 lenWorker([],Acc)->Acc;
 lenWorker([{_,X}|T], Acc)-> lenWorker(T,Acc+X).
 
-%F([], Combinations, Acc)-> {success, Acc};
-%F(Metalist, [Hcom|Tcom], Acc) -> Delta = subtract(Hcom, Metalist),
-%                                
-%
-%
-%F(Metalist, [Hcom|Tcom], Acc)-> Delta = subtract(Hcom,Metalist),
-%                                case length(Delta) < length(Metalist)
-%                                true -> {Des, Val} = F(Delta, Tcom, Acc++[Hcom]),
-%                                            case Des of 
-%                                            success -> Val end;
-%                                False -> {Des, Val} = F(Metalist, Tcom, Acc) end,
-                            
-                                
+ 
 
 %%%%%%%%%%%%%%%%%%%%%%%%
 %%%
@@ -249,8 +233,8 @@ getSentences(NumberList)->
 %%% Achtung: Das Woerterbuch ist ueber die Linux-Manpages generiert - manche Woerter
 %%% ergeben nicht unbedingt augenscheinlichen Sinn. 
 -spec frname()->list(char()).		
-%frname()-> "words_eng.txt".
-frname()-> "stub.txt".
+frname()-> "words_eng.txt".
+%frname()-> "stub.txt".
 
 
 -spec loadDictionary()->{ok, {list(list(char)),integer()}} | {error, atom()}.
