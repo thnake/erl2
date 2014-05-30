@@ -170,10 +170,6 @@ case lists:keyfind(K2,1,Occ1) of
 %%% ["nil","Rex","Zulu"],
 %%% ["Lin","Rex","Zulu"]]
 
-t()->getWordLists([{$e,1},{$i,1},{$l,2},{$n,1},{$r,1},{$u,2},{$x,1},{$z,1}],dictionaryOccurences()).
-t(X)->getWordLists(X,dictionaryOccurences()).
-
-l()->D =dictionaryOccurences(), [X || X <- dict:fetch([{$a,2},{$c,2}],D)]. 
 
 -spec getWordLists(occurrenceList(), dict())->list(list(list(char()))).
 getWordLists([],_)->[[]];
@@ -181,27 +177,6 @@ getWordLists(OccList, Dict) ->
 [[Word|Y] || X <- combinations(OccList), dict:is_key(X, Dict), Y <- getWordLists(subtract(X,OccList),Dict), Word <- dict:fetch(X,Dict)].
 
 
-
-
-keyfind(X,Dict)->{_, W} = dict:find(X,Dict),print(w,W),true.
-
-g()->[[X|Y] || X <- g1(), Y <- g2() ,grd(X,Y)].
-g1()->print(g1),[1,2,3].
-g2()->print(g2),[7,8,9].
-grd(X,Y)->print(X,Y), print(grd),true.
-
-
-
-%wordsSuperset([], Dict, Acc) -> Acc;
-%wordsSuperset([H|T], Dict, Acc)->  {ok, Item} = dict:find(H,Dict), (T, Dict, lists:append(Acc,Item)).
-
-
-
-len(OL)->lenWorker(OL,0).
-lenWorker([],Acc)->Acc;
-lenWorker([{_,X}|T], Acc)-> lenWorker(T,Acc+X).
-
- 
 
 %%%%%%%%%%%%%%%%%%%%%%%%
 %%%
@@ -211,6 +186,10 @@ lenWorker([{_,X}|T], Acc)-> lenWorker(T,Acc+X).
 
 -spec filterWords(list(char()), list(list(char()))) -> list(list(char)).
 filterWords(NumList, WordList)-> toBeDefined.
+
+wordToNumber([],Acc)->Acc;
+wordToNumber([H|T],Acc)->wordToNumber(T, Acc++[assignNum(H)]).
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%
 %%%
