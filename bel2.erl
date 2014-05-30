@@ -185,10 +185,12 @@ getWordLists(OccList, Dict) ->
 %%%
 
 -spec filterWords(list(char()), list(list(char()))) -> list(list(char)).
-filterWords(NumList, WordList)-> toBeDefined.
+filterWords(NL, WL)-> [[lists:flatten(lists:merge(X))] || X <- WL, string:equal(NL,lists:flatten(wordToNumber(lists:merge(X),[])))].
+
+
 
 wordToNumber([],Acc)->Acc;
-wordToNumber([H|T],Acc)->wordToNumber(T, Acc++[assignNum(H)]).
+wordToNumber([H|T],Acc)->wordToNumber(T, [Acc]++[assignNum(H)]).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%
@@ -202,7 +204,7 @@ getSentences(NumberList)->
 		PossWords= extractLetters(NumberList),
 		OccListWords= lists:map(fun(X)->letterOccurences(X) end,PossWords),
 		Dict= dictionaryOccurences(),
-		lists:flatmap(fun(X)->getWordLists(X,Dict) end, OccListWords).
+		lists:flatmap(fun(X)->getWordLists(X,Dict) end, OccListWords) .
 
 %%%%%%%
 %%%%%%% Helper Functions
@@ -213,8 +215,6 @@ getSentences(NumberList)->
 %%% ergeben nicht unbedingt augenscheinlichen Sinn. 
 -spec frname()->list(char()).		
 frname()-> "words_eng.txt".
-%frname()-> "stub.txt".
-
 
 -spec loadDictionary()->{ok, {list(list(char)),integer()}} | {error, atom()}.
 loadDictionary() ->    
