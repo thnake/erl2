@@ -19,8 +19,8 @@ print(P)->io:write(P),io:fwrite("~n"),true.
 %%%
 %%%%%%%%%%%%%%%%
 -spec extractLetters(list(non_neg_integer()))->list(list(char())).
-extractLetters([H | T]) -> [ [A | B] || A <- assignChar(H), B <- extractLetters(T) ];
-extractLetters([]) -> [ [] ].
+extractLetters([])->[[]];
+extractLetters([H|T]) -> [ Y++[Q] || Y <- extractLetters(T), Q <- assignChar(H)	].
 
 
 %%%%%%%%%%%%%%%%
