@@ -19,8 +19,8 @@ print(P)->io:write(P),io:fwrite("~n"),true.
 %%%
 %%%%%%%%%%%%%%%%
 -spec extractLetters(list(non_neg_integer()))->list(list(char())).
-extractLetters([])->[[]];
-extractLetters([H|T]) -> [ Y++[Q] || Y <- extractLetters(T), Q <- assignChar(H)	].
+extractLetters([H | T]) -> [ [A | B] || A <- assignChar(H), B <- extractLetters(T) ];
+extractLetters([]) -> [ [] ].
 
 
 %%%%%%%%%%%%%%%%
@@ -34,11 +34,8 @@ extractLetters([H|T]) -> [ Y++[Q] || Y <- extractLetters(T), Q <- assignChar(H)	
 %%%%%%%%%%%%%%%%
 
 -spec splitter(char(),list({char(),non_neg_integer()}))->list({char(), non_neg_integer()}).
-splitter(X,[])->[{X, 1}];
-splitter(X,[{Y, Count}|T])-> case X == Y of
-                            true -> [{X,Count+1}|T];
-                            false -> [{X,1},{Y,Count}|T] end.
-
+splitter(X, [ {[X], I} | Q ] ) -> [ {[X], I+1} | Q ]; % Tupel ist vorhanden -> inkrementieren
+splitter(X, Acc) -> [ {[X], 1} | Acc ]. % Tupel ist für Buchstaben noch nicht vorhanden -> erstellen
 
 -spec letterOccurences(list(char()))->occurrenceList().  
 
